@@ -17,8 +17,11 @@
   },
   "homepage": "https://github.com/kanestapler/ice-trae-bot-tweeter#readme",
   "dependencies": {
+    "dotenv": "^6.1.0",
     "express": "^4.16.4",
+    "oauth": "^0.9.15",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "serverless-http": "^1.8.0"
   }
 }
