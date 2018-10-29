@@ -5,7 +5,7 @@ const serverless = require('serverless-http')
 require('dotenv').config()
 const app = express()
 app.use(bodyParser.json())
-const PORT = 3000
+const PORT = 3002
 const TWEET_EMOJI = '❄️'
 const TWITTER_POST_URL = 'https://api.twitter.com/1.1/statuses/update.json'
 
@@ -41,6 +41,7 @@ app.post('/', function (req, res) {
 app.listen(PORT, () => console.log(`Tweet Bot app listening on port ${PORT}!`))
 
 function postTweet(amount) {
+    amount = Number(amount)
     const tweetBody = TWEET_EMOJI.repeat(amount)
     console.log(`tweet body: ${tweetBody}`)
     return new Promise(function (resolve, reject) {
