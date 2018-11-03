@@ -7,7 +7,7 @@ const app = express()
 app.use(bodyParser.json())
 const PORT = 3002
 const TWEET_EMOJI = '❄️'
-const GAME_START_TEXT = 'Ice Trae Ready #BeatTheTEAM_NAME'
+const GAME_START_TEXT = 'Ice Trae Ready #BeatTheTEAM_NAME #TrueToAtlanta'
 const TWITTER_POST_URL = 'https://api.twitter.com/1.1/statuses/update.json'
 
 var oauth = new OAuth.OAuth(
