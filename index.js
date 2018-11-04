@@ -2,6 +2,7 @@ const express = require('express')
 const OAuth = require('oauth')
 const bodyParser = require('body-parser')
 const serverless = require('serverless-http')
+const rp = require('request-promise')
 require('dotenv').config()
 const app = express()
 app.use(bodyParser.json())
@@ -9,6 +10,7 @@ const PORT = 3002
 const TWEET_EMOJI = '❄️'
 const GAME_START_TEXT = 'Ice Trae Ready #BeatTheTEAM_NAME #TrueToAtlanta'
 const TWITTER_POST_URL = 'https://api.twitter.com/1.1/statuses/update.json'
+const TWEET_URL = 'https://twitter.com/USER_NAME/status/TWEET_ID'
 
 var oauth = new OAuth.OAuth(
     'https://api.twitter.com/oauth/request_token',
@@ -24,14 +26,24 @@ app.get('/', (req, res) => res.send('Tweet Bot Running'))
 app.post('/shotMade', function (req, res) {
     const amount = req.body.amount
     const token = req.body.token
+    const slack = req.body.slack
     if (token !== process.env.API_TOKEN) {
         res.status(401)
         res.send({ message: 'incorrect token' })
     } else {
         console.log(`Tweeting ${amount} snowflakes`)
-        tweetMadeShot(amount).then(function (data) {
+        tweetMadeShot(amount).then(function (twitterResponse) {
             console.log('Successful Tweet')
-            res.send(`POST Tweet with ${amount} snowflakes`)
+            if (slack) {
+                const tweetUrl = getTwitterURL(twitterResponse)
+                postToSlack(tweetUrl).then(function (success) {
+                    res.send(`POST Tweet and Slack with ${amount} snowflakes`)
+                }).catch(function (responseError) {
+                    res.send(`Error during Post to Slack. Tweet posted Successfully. ${responseError}`)
+                })
+            } else {
+                res.send(`POST Tweet with ${amount} snowflakes`)
+            }
         }).catch(function (error) {
             console.log('ERROR Tweeting')
             res.send(`Error posting tweet`)
@@ -42,14 +54,24 @@ app.post('/shotMade', function (req, res) {
 app.post('/gameStart', function (req, res) {
     const opponent = req.body.opponent
     const token = req.body.token
+    const slack = req.body.slack
     if (token !== process.env.API_TOKEN) {
         res.status(401)
         res.send({ message: 'incorrect token' })
     } else {
         console.log(`Tweeting ${opponent} game start`)
-        tweetGameStart(opponent).then(function (data) {
+        tweetGameStart(opponent).then(function (twitterResponse) {
             console.log('Successful Tweet')
-            res.send(`POST Tweet with ${opponent} game starting`)
+            if (slack) {
+                const tweetUrl = getTwitterURL(twitterResponse)
+                postToSlack(tweetUrl).then(function (success) {
+                    res.send(`POST Tweet and Slack with ${opponent} game starting`)
+                }).catch(function (responseError) {
+                    res.send(`Error during Post to Slack. Tweet posted Successfully. ${responseError}`)
+                })
+            } else {
+                res.send(`POST Tweet with ${opponent} game starting`)
+            }
         }).catch(function (error) {
             console.log('ERROR Tweeting')
             res.send(error)
@@ -101,11 +123,29 @@ function postTweet(tweetBody) {
                 if (error) {
                     reject(error)
                 } else {
-                    resolve(JSON.parse(data))
+                    const twitterResponse = JSON.parse(data)
+                    resolve(twitterResponse)
                 }
             }
         )
     })
+}
+
+function getTwitterURL(twitterResponse) {
+    return TWEET_URL.replace('USER_NAME', twitterResponse.user.screen_name).replace('TWEET_ID', twitterResponse.id_str)
+}
+
+function postToSlack(body) {
+    const url = process.env.SLACK_WEB_HOOK_URL
+    const options = {
+        method: 'POST',
+        uri: url,
+        body: {
+            text: body
+        },
+        json: true
+    };
+    return rp.post(options)
 }
 
 module.exports.handler = serverless(app)
