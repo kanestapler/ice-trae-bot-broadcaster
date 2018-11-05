@@ -7,8 +7,6 @@ require('dotenv').config()
 const app = express()
 app.use(bodyParser.json())
 const PORT = 3002
-const TWEET_EMOJI = '❄️'
-const GAME_START_TEXT = 'Ice Trae Ready #BeatTheTEAM_NAME #TrueToAtlanta'
 const TWITTER_POST_URL = 'https://api.twitter.com/1.1/statuses/update.json'
 const TWEET_URL = 'https://twitter.com/USER_NAME/status/TWEET_ID'
 
@@ -23,7 +21,7 @@ var oauth = new OAuth.OAuth(
 )
 app.get('/', (req, res) => res.send('Tweet Bot Running'))
 
-app.post('/shotMade', function (req, res) {
+app.post('/emojis', function (req, res) {
     const amount = req.body.amount
     const token = req.body.token
     const slack = req.body.slack
@@ -100,13 +98,13 @@ app.post('/text', function (req, res) {
 app.listen(PORT, () => console.log(`Tweet Bot app listening on port ${PORT}!`))
 
 function tweetGameStart(opponent) {
-    const tweetBody = GAME_START_TEXT.replace('TEAM_NAME', opponent)
+    const tweetBody = process.env.GAME_START_TEXT.replace('TEAM_NAME', opponent)
     return postTweet(tweetBody)
 }
 
 function tweetMadeShot(amount) {
     amount = Number(amount)
-    const tweetBody = TWEET_EMOJI.repeat(amount)
+    const tweetBody = process.env.TWEET_EMOJI.repeat(amount)
     console.log(`tweet body: ${tweetBody}`)
     return postTweet(tweetBody)
 }
