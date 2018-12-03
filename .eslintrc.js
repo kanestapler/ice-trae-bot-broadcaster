@@ -11,6 +11,7 @@ module.exports = {
             exports: 'always-multiline',
             functions: 'never',
         }],
-        'no-console': 'off'
-    }
+        'no-console': 'off',
+    },
+    'parser': 'babel-eslint'
 };
