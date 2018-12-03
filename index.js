@@ -31,24 +31,25 @@ app.post('/broadcast', (req, res) => {
         res.status(500)
         res.send({ message: 'No message to broadcast' })
     } else {
-        Twitter.postTweet(message, twitterAccessToken, twitterAccessTokenSecret).then((tweetResponse) => {
-            if (slackUrl) {
-                const tweetUrl = Twitter.getTwitterURL(tweetResponse)
-                Slack.postToSlack(slackUrl, tweetUrl).then(() => {
+        Twitter.postTweet(message, twitterAccessToken, twitterAccessTokenSecret)
+            .then((tweetResponse) => {
+                if (slackUrl) {
+                    const tweetUrl = Twitter.getTwitterURL(tweetResponse)
+                    Slack.postToSlack(slackUrl, tweetUrl).then(() => {
+                        res.send({ message: 'Successful broacast' })
+                    }).catch((error) => {
+                        console.log(error)
+                        res.status(500)
+                        res.send({ message: 'Error trying to slack message' })
+                    })
+                } else {
                     res.send({ message: 'Successful broacast' })
-                }).catch((error) => {
-                    console.log(error)
-                    res.status(500)
-                    res.send({ message: 'Error trying to slack message' })
-                })
-            } else {
-                res.send({ message: 'Successful broacast' })
-            }
-        }).catch((error) => {
-            console.log(error)
-            res.status(500)
-            res.send({ message: 'Error trying to tweet message' })
-        })
+                }
+            }).catch((error) => {
+                console.log(error)
+                res.status(500)
+                res.send({ message: 'Error trying to tweet message' })
+            })
     }
 })
 
