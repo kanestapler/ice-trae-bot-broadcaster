@@ -1,4 +1,4 @@
-service: ice-trae-bot-tweeter
+service: ice-trae-bot-broadcaster-test
 
 provider:
   name: aws
